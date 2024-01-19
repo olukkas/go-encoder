@@ -1,3 +1,3 @@
 module github.com/olukkas/go-encoder
 
-go 1.21.4
+go 1.13
