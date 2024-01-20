@@ -30,7 +30,7 @@ func prepare() (*domain.Video, repositories.VideoRepository) {
 	}, repositories.NewVideoRepositoryDb(db)
 }
 
-func TestVideoService_Download(t *testing.T) {
+func TestVideoService_DownloadAndFragment(t *testing.T) {
 	video, repo := prepare()
 
 	videoService := services.VideoService{}
@@ -38,5 +38,8 @@ func TestVideoService_Download(t *testing.T) {
 	videoService.VideoRepository = repo
 
 	err := videoService.Download("go-encoder-bucket")
+	require.Nil(t, err)
+
+	err = videoService.Fragment()
 	require.Nil(t, err)
 }
