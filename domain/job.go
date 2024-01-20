@@ -14,6 +14,7 @@ type JobStatus string
 
 const (
 	JobDownloading JobStatus = "DOWNLOADING"
+	JobPending     JobStatus = "PENDING"
 )
 
 type Job struct {
