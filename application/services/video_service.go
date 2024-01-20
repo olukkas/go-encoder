@@ -11,8 +11,6 @@ import (
 	"os/exec"
 )
 
-var storagePath = os.Getenv("LOCAL_STORAGE_PATH")
-
 type VideoService struct {
 	Video           *domain.Video
 	VideoRepository repositories.VideoRepository
@@ -25,7 +23,7 @@ func (v *VideoService) Download(bucketName string) error {
 	if err != nil {
 		return err
 	}
-	client.Close()
+	defer client.Close()
 
 	r, err := client.Bucket(bucketName).Object(v.Video.FilePath).NewReader(ctx)
 	if err != nil {
@@ -42,7 +40,7 @@ func (v *VideoService) Download(bucketName string) error {
 }
 
 func (v *VideoService) Fragment() error {
-	path := storagePath + "/" + v.Video.ID
+	path := os.Getenv("LOCAL_STORAGE_PATH") + "/" + v.Video.ID
 
 	err := os.Mkdir(path, os.ModePerm)
 	if err != nil {
@@ -65,6 +63,8 @@ func (v *VideoService) Fragment() error {
 
 //goland:noinspection GoDeprecation
 func (v *VideoService) writeInDisk(reader *storage.Reader) error {
+	storagePath := os.Getenv("LOCAL_STORAGE_PATH")
+
 	body, err := ioutil.ReadAll(reader)
 
 	f, err := os.Create(storagePath + "/" + v.Video.ID + ".mp4")
