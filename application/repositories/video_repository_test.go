@@ -16,7 +16,7 @@ func TestVideoRepositoryDB_Insert(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, video)
 
-	repo := repositories.NewVideoRepositoryDB(db)
+	repo := repositories.NewVideoRepositoryDb(db)
 	_, err = repo.Insert(video)
 	require.Nil(t, err)
 
