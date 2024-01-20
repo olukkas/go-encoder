@@ -18,18 +18,18 @@ type Video struct {
 }
 
 func NewVideo(resourceID, filePath string) (*Video, error) {
-	v := &Video{
+	video := &Video{
 		ID:         uuid.NewV4().String(),
 		ResourceID: resourceID,
 		FilePath:   filePath,
 		CreatedAt:  time.Now(),
 	}
 
-	if err := v.Validate(); err != nil {
+	if err := video.Validate(); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return video, nil
 }
 
 func (v *Video) Validate() error {
