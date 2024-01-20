@@ -11,10 +11,11 @@ func init() {
 }
 
 type Video struct {
-	ID         string    `valid:"uuid"`
-	ResourceID string    `valid:"notnull"`
-	FilePath   string    `valid:"notnull"`
-	CreatedAt  time.Time `valid:"-"`
+	ID         string    `json:"encoded_vide_folder" valid:"uuid" gorm:"type:uuid;primary_key"`
+	ResourceID string    `json:"resource_id" valid:"notnull"`
+	FilePath   string    `json:"file_path" valid:"notnull"`
+	CreatedAt  time.Time `json:"-" valid:"-"`
+	Jobs       []*Job    `json:"-" valid:"-" gorm:"ForeignKey:VideoId"`
 }
 
 func NewVideo(resourceID, filePath string) (*Video, error) {
