@@ -61,6 +61,55 @@ func (v *VideoService) Fragment() error {
 	return nil
 }
 
+func (v *VideoService) Encode() error {
+	path := os.Getenv("LOCAL_STORAGE_PATH") + "/" + v.Video.ID
+	cmdArgs := []string{
+		path + ".frag",
+		"--use-segment-timeline",
+		"-o",
+		path,
+		"-f",
+		"--exec-dir",
+		"/opt/bento4/bin/",
+	}
+
+	cmd := exec.Command("mp4dash", cmdArgs...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+
+	printOutput(output)
+
+	return nil
+}
+
+func (v *VideoService) Finish() error {
+	path := os.Getenv("LOCAL_STORAGE_PATH") + "/" + v.Video.ID
+
+	err := os.Remove(path + ".mp4")
+	if err != nil {
+		log.Println("error removing mp4", v.Video.ID, ".mp4")
+		return err
+	}
+
+	err = os.Remove(path + ".frag")
+	if err != nil {
+		log.Println("error removing frag", v.Video.ID, ".frag")
+		return err
+	}
+
+	err = os.RemoveAll(path)
+	if err != nil {
+		log.Println("error removing directory", v.Video.ID)
+		return err
+	}
+
+	log.Println("files has been removed: ", v.Video.ID)
+
+	return nil
+}
+
 //goland:noinspection GoDeprecation
 func (v *VideoService) writeInDisk(reader *storage.Reader) error {
 	storagePath := os.Getenv("LOCAL_STORAGE_PATH")
