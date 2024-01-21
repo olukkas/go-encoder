@@ -15,6 +15,12 @@ type JobStatus string
 const (
 	JobDownloading JobStatus = "DOWNLOADING"
 	JobPending     JobStatus = "PENDING"
+	JobFailed      JobStatus = "FAILED"
+	JobFragmenting JobStatus = "FRAGMENTING"
+	JobEncoding    JobStatus = "ENCODING"
+	JobFinishing   JobStatus = "FINISHING"
+	JobUploading   JobStatus = "UPLOADING"
+	JobCompleted   JobStatus = "COMPLETED"
 )
 
 type Job struct {
