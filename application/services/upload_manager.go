@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/storage"
 	"context"
 	"io"
-	"io/fs"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -47,17 +47,27 @@ func (vu *VideoUpload) UploadObject(objectPath string, client *storage.Client, c
 }
 
 func (vu *VideoUpload) loadPaths() error {
-	walkFn := func(path string, info fs.FileInfo, _ error) error {
-		if !info.IsDir() {
-			vu.Paths = append(vu.Paths, path)
-		}
+	return vu.walkDir(vu.VideoPath)
+}
 
-		return nil
-	}
-
-	err := filepath.Walk(vu.VideoPath, walkFn)
+func (vu *VideoUpload) walkDir(dir string) error {
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
+	}
+
+	for _, file := range files {
+		path := filepath.Join(dir, file.Name())
+
+		if file.IsDir() {
+			// Recursively walk through subdirectories
+			if err := vu.walkDir(path); err != nil {
+				return err
+			}
+		} else {
+			// Add file path to Paths
+			vu.Paths = append(vu.Paths, path)
+		}
 	}
 
 	return nil
