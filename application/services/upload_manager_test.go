@@ -41,6 +41,7 @@ func TestVideoServiceUpload(t *testing.T) {
 	go videoUpload.ProcessUpload(10, doneUpload)
 
 	result := <-doneUpload
+	require.Len(t, videoUpload.Errors, 0)
 	require.Equal(t, result, "upload completed")
 
 	err = videoService.Finish()
