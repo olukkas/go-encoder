@@ -2,6 +2,7 @@ package queue
 
 import (
 	"fmt"
+	"github.com/olukkas/go-encoder/framework/utils"
 	"github.com/streadway/amqp"
 	"log"
 	"os"
@@ -42,10 +43,10 @@ func (r *RabbitMQ) Connect() *amqp.Channel {
 	dns := fmt.Sprintf("amqp://%s:%s@%s:%s%s", r.User, r.Password, r.Host, r.Port, r.Vhost)
 
 	conn, err := amqp.Dial(dns)
-	failOnError(err, "failed to connect to RabbitMQ")
+	utils.FailOnError(err, "failed to connect to RabbitMQ")
 
 	r.Channel, err = conn.Channel()
-	failOnError(err, "Failed to open a channel")
+	utils.FailOnError(err, "Failed to open a channel")
 
 	return r.Channel
 }
@@ -59,7 +60,7 @@ func (r *RabbitMQ) Consume(messageChannel chan amqp.Delivery) {
 		false,
 		r.Args,
 	)
-	failOnError(err, "failed to declare a queue")
+	utils.FailOnError(err, "failed to declare a queue")
 
 	incomingMessages, err := r.Channel.Consume(
 		q.Name,
@@ -70,7 +71,7 @@ func (r *RabbitMQ) Consume(messageChannel chan amqp.Delivery) {
 		false,
 		r.Args,
 	)
-	failOnError(err, "Failed to register a consumer")
+	utils.FailOnError(err, "Failed to register a consumer")
 
 	go func() {
 		for message := range incomingMessages {
@@ -92,10 +93,4 @@ func (r *RabbitMQ) Notify(message, contentType, exchange, routingKey string) err
 			Body:        []byte(message),
 		},
 	)
-}
-
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
-	}
 }
