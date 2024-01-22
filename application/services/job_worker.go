@@ -69,6 +69,11 @@ func prepare(message amqp.Delivery, jobService JobService) (*domain.Job, error) 
 		return nil, err
 	}
 
+	_, err = jobService.JobsRepository.Insert(job)
+	if err != nil {
+		return nil, err
+	}
+
 	return job, nil
 }
 
