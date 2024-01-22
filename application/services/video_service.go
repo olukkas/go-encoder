@@ -110,6 +110,11 @@ func (v *VideoService) Finish() error {
 	return nil
 }
 
+func (v *VideoService) InsertVideo() error {
+	_, err := v.VideoRepository.Insert(v.Video)
+	return err
+}
+
 //goland:noinspection GoDeprecation
 func (v *VideoService) writeInDisk(reader *storage.Reader) error {
 	storagePath := os.Getenv("LOCAL_STORAGE_PATH")

@@ -21,6 +21,7 @@ const (
 	JobFinishing   JobStatus = "FINISHING"
 	JobUploading   JobStatus = "UPLOADING"
 	JobCompleted   JobStatus = "COMPLETED"
+	JobStarting    JobStatus = "STARTING"
 )
 
 type Job struct {
@@ -40,6 +41,7 @@ func NewJob(output string, status JobStatus, video *Video) (*Job, error) {
 		OutputBucketPath: output,
 		Status:           status,
 		Video:            video,
+		VideoId:          video.ID,
 		CreatedAt:        time.Now(),
 		UpdatedAt:        time.Now(),
 	}
