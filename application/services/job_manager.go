@@ -75,7 +75,7 @@ func (j *JobManager) notifySuccess(result JobWorkerResult) error {
 		return err
 	}
 
-	err = j.notify(jobJson)
+	err = j.notify(jobJson, os.Getenv("RABBITMQ_NOTIFICATION_EX"))
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (j *JobManager) checkParseErrors(result JobWorkerResult) error {
 		return err
 	}
 
-	err = j.notify(jobJson)
+	err = j.notify(jobJson, os.Getenv("RABBITMQ_DLX"))
 	if err != nil {
 		return err
 	}
@@ -118,11 +118,11 @@ func (j *JobManager) checkParseErrors(result JobWorkerResult) error {
 
 	return nil
 }
-func (j *JobManager) notify(jobJson []byte) error {
+func (j *JobManager) notify(jobJson []byte, exchange string) error {
 	return j.RabbitMQ.Notify(
 		string(jobJson),
 		"application/json",
-		os.Getenv("RABBITMQ_NOTIFICATION_EX"),
+		exchange,
 		os.Getenv("RABBITMQ_NOTIFICATION_ROUTING_KEY"),
 	)
 }
