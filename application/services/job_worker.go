@@ -18,69 +18,65 @@ type JobWorkerResult struct {
 
 func JobWorker(messageChannel chan amqp.Delivery, returnChan chan JobWorkerResult, jobService JobService) {
 	for message := range messageChannel {
-		job, err := prepare(message, jobService)
+		if !utils.IsJson(string(message.Body)) {
+			returnChan <- returnJobResult(domain.Job{}, message, errors.New("message is not a json"))
+			continue
+		}
+
+		err := json.Unmarshal(message.Body, &jobService.VideoService.Video)
+		jobService.VideoService.Video.ID = uuid.NewV4().String()
+
 		if err != nil {
-			returnChan <- invalidJobResult(message, err)
+			returnChan <- returnJobResult(domain.Job{}, message, err)
+			continue
+		}
+
+		err = jobService.VideoService.Video.Validate()
+		if err != nil {
+			returnChan <- returnJobResult(domain.Job{}, message, err)
+			continue
+		}
+
+		err = jobService.VideoService.InsertVideo()
+
+		if err != nil {
+			returnChan <- returnJobResult(domain.Job{}, message, err)
+			continue
+		}
+
+		bucket := os.Getenv("OUTPUT_BUCKET_NAME")
+		job, err := domain.NewJob(bucket, domain.JobStarting, jobService.VideoService.Video)
+		if err != nil {
+			returnChan <- returnJobResult(domain.Job{}, message, err)
+			continue
+		}
+
+		_, err = jobService.JobsRepository.Insert(job)
+
+		if err != nil {
+			returnChan <- returnJobResult(domain.Job{}, message, err)
 			continue
 		}
 
 		jobService.Job = job
-
 		err = jobService.Start()
+
 		if err != nil {
-			returnChan <- invalidJobResult(message, err)
+			returnChan <- returnJobResult(domain.Job{}, message, err)
 			continue
 		}
 
-		returnChan <- JobWorkerResult{
-			Job:     *job,
-			Message: &message,
-			Error:   nil,
-		}
+		returnChan <- returnJobResult(*job, message, nil)
+
 	}
+
 }
-
-func prepare(message amqp.Delivery, jobService JobService) (*domain.Job, error) {
-	video := jobService.VideoService.Video
-
-	if !utils.IsJson(string(message.Body)) {
-		return nil, errors.New("message is not a json")
-	}
-
-	err := json.Unmarshal(message.Body, video)
-	if err != nil {
-		return nil, err
-	}
-	video.ID = uuid.NewV4().String()
-
-	err = video.Validate()
-	if err != nil {
-		return nil, err
-	}
-
-	err = jobService.VideoService.InsertVideo()
-	if err != nil {
-		return nil, err
-	}
-
-	outputBucket := os.Getenv("OUTPUT_BUCKET_NAME")
-	job, err := domain.NewJob(outputBucket, domain.JobStarting, jobService.VideoService.Video)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = jobService.JobsRepository.Insert(job)
-	if err != nil {
-		return nil, err
-	}
-
-	return job, nil
-}
-
-func invalidJobResult(message amqp.Delivery, err error) JobWorkerResult {
-	return JobWorkerResult{
-		Job:     domain.Job{},
+func returnJobResult(job domain.Job, message amqp.Delivery, err error) JobWorkerResult {
+	result := JobWorkerResult{
+		Job:     job,
 		Message: &message,
 		Error:   err,
 	}
+
+	return result
 }

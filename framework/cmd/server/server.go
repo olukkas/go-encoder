@@ -14,7 +14,7 @@ import (
 var db database.DataBase
 
 func init() {
-	err := godotenv.Load("../../../.env")
+	err := godotenv.Load()
 	utils.FailOnError(err, "Error loading .env file")
 
 	err = configDb()

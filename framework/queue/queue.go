@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"fmt"
 	"github.com/olukkas/go-encoder/framework/utils"
 	"github.com/streadway/amqp"
 	"log"
@@ -40,8 +39,7 @@ func NewRabbitMQ() *RabbitMQ {
 }
 
 func (r *RabbitMQ) Connect() *amqp.Channel {
-	dns := fmt.Sprintf("amqp://%s:%s@%s:%s%s", r.User, r.Password, r.Host, r.Port, r.Vhost)
-
+	dns := "amqp://" + r.User + ":" + r.Password + "@" + r.Host + ":" + r.Port + r.Vhost
 	conn, err := amqp.Dial(dns)
 	utils.FailOnError(err, "failed to connect to RabbitMQ")
 
