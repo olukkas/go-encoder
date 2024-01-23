@@ -70,7 +70,10 @@ func (j *JobManager) Start() {
 }
 
 func (j *JobManager) notifySuccess(result JobWorkerResult) error {
+	Mutex.Lock()
 	jobJson, err := json.Marshal(result.Job)
+	Mutex.Unlock()
+
 	if err != nil {
 		return err
 	}
