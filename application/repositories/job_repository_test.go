@@ -1,7 +1,7 @@
 package repositories_test
 
 import (
-	"github.com/jinzhu/gorm"
+	"database/sql"
 	"github.com/olukkas/go-encoder/application/repositories"
 	"github.com/olukkas/go-encoder/domain"
 	"github.com/olukkas/go-encoder/framework/database"
@@ -13,11 +13,17 @@ func TestJobRepositoryDb_Insert(t *testing.T) {
 	db := database.NewDataBaseTest()
 	defer db.Close()
 
+	err := createVideosTable(db)
+	require.Nil(t, err)
+
+	err = createJobsTable(db)
+	require.Nil(t, err)
+
 	jobRepo := repositories.NewJobRepositoryDb(db)
 
 	job := prepareJobHelper(t, db)
 
-	_, err := jobRepo.Insert(job)
+	_, err = jobRepo.Insert(job)
 	require.Nil(t, err)
 
 	j, err := jobRepo.Find(job.ID)
@@ -31,10 +37,16 @@ func TestJobRepositoryDb_Update(t *testing.T) {
 	db := database.NewDataBaseTest()
 	defer db.Close()
 
+	err := createVideosTable(db)
+	require.Nil(t, err)
+
+	err = createJobsTable(db)
+	require.Nil(t, err)
+
 	jobRepo := repositories.NewJobRepositoryDb(db)
 	job := prepareJobHelper(t, db)
 
-	_, err := jobRepo.Insert(job)
+	_, err = jobRepo.Insert(job)
 	require.Nil(t, err)
 
 	job.Status = domain.JobDownloading
@@ -43,7 +55,7 @@ func TestJobRepositoryDb_Update(t *testing.T) {
 	require.Equal(t, domain.JobDownloading, updated.Status)
 }
 
-func prepareJobHelper(t *testing.T, db *gorm.DB) *domain.Job {
+func prepareJobHelper(t *testing.T, db *sql.DB) *domain.Job {
 	video, err := domain.NewVideo("resource", "path")
 	require.Nil(t, err)
 	require.NotNil(t, video)

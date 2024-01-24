@@ -1,8 +1,8 @@
 package services
 
 import (
+	"database/sql"
 	"encoding/json"
-	"github.com/jinzhu/gorm"
 	"github.com/olukkas/go-encoder/application/repositories"
 	"github.com/olukkas/go-encoder/framework/queue"
 	"github.com/streadway/amqp"
@@ -12,7 +12,7 @@ import (
 )
 
 type JobManager struct {
-	DB             *gorm.DB
+	DB             *sql.DB
 	MessageChannel chan amqp.Delivery
 	ReturnChannel  chan JobWorkerResult
 	RabbitMQ       *queue.RabbitMQ
@@ -24,7 +24,7 @@ type JobNotificationError struct {
 }
 
 func NewJobManager(
-	DB *gorm.DB,
+	DB *sql.DB,
 	rabbitMq *queue.RabbitMQ,
 	returnChannel chan JobWorkerResult,
 	messageChannel chan amqp.Delivery,
